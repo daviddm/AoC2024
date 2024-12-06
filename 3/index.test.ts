@@ -46,7 +46,7 @@ describe("today", () => {
   describe("second", () => {
     it("test", async () => {
       // const result = await run(testList2, true);
-      const result = await run2(testList2);
+      const result = await run(testList2, true);
       expect(result).toEqual(48);
     });
     it("run", async () => {

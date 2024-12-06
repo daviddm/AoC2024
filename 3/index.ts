@@ -1,33 +1,34 @@
 import { sum } from "@util/sum";
 
-const regexp1 = new RegExp(/mul\([\d]{1,3},[\d]{1,3}\)/, "g");
-const regexp2 = new RegExp(/mul\([\d]{1,3},[\d]{1,3}\)|do\(\)|don\'t\(\)/, "g");
+const regexp = new RegExp(/mul\([\d]{1,3},[\d]{1,3}\)|do\(\)|don't\(\)/, "g");
 
 export const run = async (list: string[], check = false) => {
-  const regexp = check ? regexp2 : regexp1;
   const result = list
     .map((row) => {
       let enabled = true;
       const muls = [];
-      while (true) {
-        const statement = regexp.exec(row);
-        if (statement === null) {
-          break;
-        }
 
-        if (statement[0] === "don't()") {
-          enabled = false;
-          continue;
-        }
-        if (statement[0] === "do()") {
+      const matches = row.matchAll(regexp);
+      // console.log(matches);
+
+      for (const match of matches) {
+        // const statement = regexp.exec(row);
+        // if (match === null) {
+        //   break;
+        // }
+
+        if (match[0] === "do()") {
           enabled = true;
           continue;
         }
-        if (!enabled) {
+        if (match[0] === "don't()") {
+          enabled = false;
           continue;
         }
-        // console.log(statement);
-        muls.push(statement[0]);
+        if (check && !enabled) {
+          continue;
+        }
+        muls.push(match[0]);
       }
       return muls.map(multiply).reduce(sum);
     })
@@ -37,8 +38,11 @@ export const run = async (list: string[], check = false) => {
 
 export function multiply(input: string): number {
   try {
-    const full = input.match(/\(([\d]+),([\d]+)\)/) as any;
-    return full[1] * full[2];
+    const full = input.match(/\(([\d]+),([\d]+)\)/);
+    if (full === null) {
+      return 0;
+    }
+    return +full[1] * +full[2];
   } catch (error) {
     console.error(input);
   }
